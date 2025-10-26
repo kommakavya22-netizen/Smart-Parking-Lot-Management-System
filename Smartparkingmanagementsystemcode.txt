@@ -1,0 +1,144 @@
+CODE:
+
+import java.util.Scanner;
+
+ public class Vehicle {
+    private String plateNumber;
+    private String vehicleType;
+    private int entryTime;
+    private int exitTime;
+    private double fee;
+    private boolean slotAvailable;
+
+    public static int vehicleCount = 0;
+    private static final int MAX_SLOTS = 10;
+
+    public Vehicle(String plateNumber, String vehicleType, int entryTime) {
+        this.plateNumber = plateNumber;
+        this.vehicleType = vehicleType.toUpperCase();
+        this.entryTime = entryTime;
+        this.slotAvailable = true;
+        vehicleCount++;
+    }
+
+    public void setExitTime(int exitTime) {
+        this.exitTime = exitTime;
+    }
+
+    public void calculateFee() {
+        int duration = exitTime - entryTime;
+        double rate;
+
+        switch (vehicleType) {
+            case "CAR":
+                rate = 2.0;
+                break;
+            case "BIKE":
+                rate = 1.0;
+                break;
+            case "EV":
+                rate = 1.5;
+                break;
+            default:
+                rate = 2.0;
+                break;
+        }
+
+        if (duration <= 0) {
+            duration = 1;
+        }
+
+        this.fee = duration * rate;
+    }
+
+    public void exitLot() {
+        slotAvailable = false;
+        vehicleCount--;
+    }
+
+    public void displayReceipt() {
+        System.out.println("\n=== Parking Receipt ===");
+        System.out.println("Plate Number : " + plateNumber);
+        System.out.println("Vehicle Type : " + vehicleType);
+        System.out.println("Entry Time   : " + entryTime + ":00");
+        System.out.println("Exit Time    : " + exitTime + ":00");
+        System.out.printf("Parking Fee  : $%.2f\n", fee);
+        System.out.println("========================\n");
+    }
+
+    public static boolean isSlotAvailable() {
+        return vehicleCount < MAX_SLOTS;
+    }
+
+    // ✅ main() moved here
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("==== Smart Parking Lot Management ====");
+            System.out.println("1. Enter Vehicle");
+            System.out.println("2. Exit Vehicle");
+            System.out.println("3. Show Current Count");
+            System.out.println("4. Exit Program");
+            System.out.print("Select an option: ");
+            if (!scanner.hasNextInt()) break;
+            int option = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (option) {
+                case 1:
+                    if (!Vehicle.isSlotAvailable()) {
+                        System.out.println("Parking Full. No slots available.\n");
+                        break;
+                    }
+
+                    System.out.print("Enter Plate Number: ");
+                    String plate = scanner.nextLine();
+
+                    System.out.print("Enter Vehicle Type (Car/Bike/EV): ");
+                    String type = scanner.nextLine();
+
+                    System.out.print("Enter Entry Time (0-23): ");
+                    int entry = scanner.nextInt();
+                    scanner.nextLine();
+
+                    Vehicle vehicle = new Vehicle(plate, type, entry);
+                    System.out.println("Vehicle Entered Successfully.\n");
+                    break;
+
+                case 2:
+                    System.out.print("Re-enter Plate Number for Exit: ");
+                    String exitPlate = scanner.nextLine();
+
+                    System.out.print("Enter Vehicle Type (Car/Bike/EV): ");
+                    String exitType = scanner.nextLine();
+
+                    System.out.print("Enter Entry Time (0-23): ");
+                    int startTime = scanner.nextInt();
+
+                    System.out.print("Enter Exit Time (0-23): ");
+                    int endTime = scanner.nextInt();
+                    scanner.nextLine();
+
+                    Vehicle exitVehicle = new Vehicle(exitPlate, exitType, startTime);
+                    exitVehicle.setExitTime(endTime);
+                    exitVehicle.calculateFee();
+                    exitVehicle.exitLot();
+                    exitVehicle.displayReceipt();
+                    break;
+
+                case 3:
+                    System.out.println("Current Vehicles in Lot: " + Vehicle.vehicleCount + "\n");
+                    break;
+
+                case 4:
+                    System.out.println("Exiting... Thank you!");
+                    scanner.close();
+                    return;
+
+                default:
+                    System.out.println("Invalid Option. Please try again.\n");
+            }
+        }
+    }
+}
